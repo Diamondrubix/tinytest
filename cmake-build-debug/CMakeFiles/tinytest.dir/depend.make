@@ -6,6 +6,5 @@ CMakeFiles/tinytest.dir/Point2d.cpp.o: ../Point2d.h
 
 CMakeFiles/tinytest.dir/Point2dTest.cpp.o: ../Point2d.h
 CMakeFiles/tinytest.dir/Point2dTest.cpp.o: ../Point2dTest.cpp
-CMakeFiles/tinytest.dir/Point2dTest.cpp.o: ../dynamicArray.h
 CMakeFiles/tinytest.dir/Point2dTest.cpp.o: ../tinytest.h
 

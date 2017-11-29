@@ -46,7 +46,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include "dynamicArray.h" //replace with c++ library later (don't have internet to google now)
+
+#include <string.h>
 
 /* Main assertion method */
 #define ASSERT(msg, expression) if (!tt_assert(__FILE__, __LINE__, (msg), (#expression), (expression) ? true : false)) //return
@@ -80,6 +81,7 @@ typedef struct testinfo{
     const char* msg;
     const char* expression;
     bool pass;
+    testinfo* next;
 } testinfo;
 
 typedef struct failureInfo{
@@ -88,11 +90,12 @@ typedef struct failureInfo{
     const char* name;
     const char* current_msg;
     const char* current_expression;
+    failureInfo* next;
 
 };
 
-dynamicArray<testinfo*>* messages = new dynamicArray<testinfo*>();
-dynamicArray<failureInfo*>* failures = new dynamicArray<failureInfo*>();
+testinfo* testH;
+failureInfo* failureInfoH;
 
 
 void tt_execute(const char* name, void (*test_function)())
@@ -131,7 +134,19 @@ bool tt_assert(const char* file, int line, const char* msg, const char* expressi
     n->msg=msg;
     n->expression=expression;
     n->pass=pass;
-    messages->add(n);
+    //messages->add(n);
+
+    if(testH ==NULL){
+      testH = n;
+    }else{
+      testinfo* temp;
+      temp=testH;
+      while(temp->next!=NULL){
+        temp=temp->next;
+      }
+      temp->next=n;
+
+    }
 
 
 
@@ -142,13 +157,29 @@ bool tt_assert(const char* file, int line, const char* msg, const char* expressi
     f->current_msg=tt_current_msg;
     f->current_expression=tt_current_expression;
       f->name=tt_current_name;
-    failures->add(f);
+    f->next=NULL;
+    //failures->add(f);
 
+
+    if(failureInfoH ==NULL){
+      failureInfoH = f;
+    }else{
+      failureInfo* temp2;
+      temp2=failureInfoH;
+      while(temp2->next!=NULL){
+        temp2=temp2->next;
+      }
+      temp2->next=f;
+
+    }
 
   }
 
   return pass;
 }
+
+
+
 
 int tt_report(void)
 {
@@ -160,10 +191,19 @@ int tt_report(void)
            messages->get(i)->file, tt_passes, messages->length()+1, tt_passes + messages->length()+1);
   }
   */
+  /*
   for(i=0;i<=failures->length();i++){
     failureInfo f = *failures->get(i);
     printf("failure: %s:%d: In test %s():\n    %s (%s)\n",
            f.current_file, f.current_line, f.name, f.current_msg, f.current_expression);
+  }
+   */
+  failureInfo* f = failureInfoH;
+  while(f != NULL) {
+    printf("failure: %s:%d: In test %s():\n    %s (%s)\n",
+           f->current_file, f->current_line, f->name, f->current_msg, f->current_expression);
+    f=f->next;
+
   }
 
     printf("\n");
