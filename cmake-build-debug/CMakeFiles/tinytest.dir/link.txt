@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/tinytest.dir/Point2d.cpp.o CMakeFiles/tinytest.dir/Point2dTest.cpp.o  -o tinytest 

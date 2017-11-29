@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/lab12.dir/Point2d.cpp.o CMakeFiles/lab12.dir/Point2dTest.cpp.o  -o lab12 

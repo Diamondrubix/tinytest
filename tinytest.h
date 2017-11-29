@@ -2,7 +2,7 @@
  *
  * Features:
  *   - No library dependencies. Not even itself. Just a header file.
- *   - Simple ANSI C. Should work with virtually every C or C++ compiler on
+ *   - Simple ANSI C. Should work with virtually ever C or C++ compiler on
  *     virtually any platform.
  *   - Reports assertion failures, including expressions and line numbers.
  *   - Stops test on first failed assertion.
@@ -44,10 +44,12 @@
 #define _TINYTEST_INCLUDED
 
 #include <stdio.h>
+#include <stdbool.h>
 #include <stdlib.h>
+#include "dynamicArray.h" //replace with c++ library later (don't have internet to google now)
 
 /* Main assertion method */
-#define ASSERT(msg, expression) if (!tt_assert(__FILE__, __LINE__, (msg), (#expression), (expression) ? 1 : 0)) return
+#define ASSERT(msg, expression) if (!tt_assert(__FILE__, __LINE__, (msg), (#expression), (expression) ? true : false)) //return
 
 /* Convenient assertion methods */
 /* TODO: Generate readable error messages for assert_equals or assert_str_equals */
@@ -65,44 +67,114 @@
 
 int tt_passes = 0;
 int tt_fails = 0;
-int tt_current_test_failed = 0;
+bool tt_current_test_failed = false;
 const char* tt_current_msg = NULL;
 const char* tt_current_expression = NULL;
 const char* tt_current_file = NULL;
 int tt_current_line = 0;
+char* tt_current_name = NULL;
+
+typedef struct testinfo{
+    const char* file;
+    int line;
+    const char* msg;
+    const char* expression;
+    bool pass;
+} testinfo;
+
+typedef struct failureInfo{
+    const char* current_file;
+    int current_line;
+    const char* name;
+    const char* current_msg;
+    const char* current_expression;
+
+};
+
+dynamicArray<testinfo*>* messages = new dynamicArray<testinfo*>();
+dynamicArray<failureInfo*>* failures = new dynamicArray<failureInfo*>();
+
 
 void tt_execute(const char* name, void (*test_function)())
 {
-  tt_current_test_failed = 0;
+  tt_current_test_failed = false;
+    tt_current_name = (char*) malloc(sizeof(name));
+    strncpy(tt_current_name,name,sizeof(name));
+    //printf("%s",tt_current_name);
   test_function();
   if (tt_current_test_failed) {
+      /* replaced below
     printf("failure: %s:%d: In test %s():\n    %s (%s)\n",
       tt_current_file, tt_current_line, name, tt_current_msg, tt_current_expression);
+*/
+
     tt_fails++;
   } else {
     tt_passes++;
   }
 }
 
-int tt_assert(const char* file, int line, const char* msg, const char* expression, int pass)
+bool tt_assert(const char* file, int line, const char* msg, const char* expression, bool pass)
 {
   tt_current_msg = msg;
   tt_current_expression = expression;
   tt_current_file = file;
   tt_current_line = line;
   tt_current_test_failed = !pass;
+
+
+    //strncpy(n->file,file,300);
+  if(!pass){
+    testinfo* n = new testinfo;
+    n->file=file;
+    n->line=line;
+    n->msg=msg;
+    n->expression=expression;
+    n->pass=pass;
+    messages->add(n);
+
+
+
+    failureInfo* f = new failureInfo;
+    f->current_file=tt_current_file;
+    f->current_line=tt_current_line;
+    //f->name=name;
+    f->current_msg=tt_current_msg;
+    f->current_expression=tt_current_expression;
+      f->name=tt_current_name;
+    failures->add(f);
+
+
+  }
+
   return pass;
 }
 
 int tt_report(void)
 {
+  int i;
+  /*for(i=0;i<=messages->length();i++){
+    //printf("%d\n",messages->get(i)->line);
+    printf("%c%sFAILED%c%s [%s] (passed:%d, failed:%d, total:%d)\n",
+           TT_COLOR_CODE, TT_COLOR_RED, TT_COLOR_CODE, TT_COLOR_RESET,
+           messages->get(i)->file, tt_passes, messages->length()+1, tt_passes + messages->length()+1);
+  }
+  */
+  for(i=0;i<=failures->length();i++){
+    failureInfo f = *failures->get(i);
+    printf("failure: %s:%d: In test %s():\n    %s (%s)\n",
+           f.current_file, f.current_line, f.name, f.current_msg, f.current_expression);
+  }
+
+    printf("\n");
+
   if (tt_fails) {
     printf("%c%sFAILED%c%s [%s] (passed:%d, failed:%d, total:%d)\n",
       TT_COLOR_CODE, TT_COLOR_RED, TT_COLOR_CODE, TT_COLOR_RESET,
       tt_current_file, tt_passes, tt_fails, tt_passes + tt_fails);
     return -1;
   } else {
-    printf("%c%sPASSED%c%s [%s] (total:%d)\n", 
+    printf("%c%sPASSED%c%s [%s] (total:%d)\n",
       TT_COLOR_CODE, TT_COLOR_GREEN, TT_COLOR_CODE, TT_COLOR_RESET,
       tt_current_file, tt_passes);
     return 0;
