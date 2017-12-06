@@ -93,9 +93,6 @@
 		<Unit filename="/home/diamondrubix/CLionProjects/tinytest/Point2dTest.cpp">
 			<Option target="tinytest"/>
 		</Unit>
-		<Unit filename="/home/diamondrubix/CLionProjects/tinytest/dynamicArray.h">
-			<Option target="tinytest"/>
-		</Unit>
 		<Unit filename="/home/diamondrubix/CLionProjects/tinytest/tinytest.h">
 			<Option target="tinytest"/>
 		</Unit>
